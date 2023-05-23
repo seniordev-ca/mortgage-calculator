@@ -14,38 +14,55 @@ class MortgageCalculatorService
         $amortizationPeriod = $data['amortization_period'];
         $paymentSchedule = $data['payment_schedule'];
 
-        $cmhcInsurance = $this->calculateCMHCInsurance($propertyPrice, $downPayment);
+        $cmhcInsurance = $this->calculateCMHCInsurance($propertyPrice, $downPayment, $amortizationPeriod);
 
-        if ($cmhcInsurance === NULL) {
-            throw new Exception('The minimum down payment in Canada is between 5% and 10%.');
-        }
         $principal = $propertyPrice + $cmhcInsurance - $downPayment;
 
         $paymentPerPaymentSchedule = $this->calculatePayment($principal, $annualInterestRate, $amortizationPeriod, $paymentSchedule);
 
         return [
-            'cmhc_insurance' => $cmhcInsurance,
+            'cmhc_insurance_premium' => $cmhcInsurance,
             'total_mortgage' => $principal,
-            'payment_per_payment_schedule' => $paymentPerPaymentSchedule,
+            'payment_per_schedule' => $paymentPerPaymentSchedule,
         ];
     }
 
-    private function calculateCMHCInsurance($propertyPrice, $downPayment)
+    public function calculateCMHCInsurance($propertyPrice, $downPayment, $amortizationPeriod)
     {
-        $downPaymentPercentage = $downPayment / $propertyPrice * 100;
-        $mortgageBeforeCMHC = $propertyPrice - $downPayment;
-
-        if ($downPaymentPercentage >= 20) {
-            return 0;
-        } else if ($downPaymentPercentage >= 15) {
-            return $mortgageBeforeCMHC * 0.028;
-        } else if ($downPaymentPercentage >= 10) {
-            return $mortgageBeforeCMHC * 0.031;
-        } else if ($downPaymentPercentage >= 5) {
-            return $mortgageBeforeCMHC * 0.04;
+        if ($propertyPrice >= 1000000) {
+            $minimumDownPayment = $propertyPrice * 0.2;
+        } elseif ($propertyPrice >= 500000) {
+            $minimumDownPayment = 500000 * 0.05 + ($propertyPrice - 500000) * 0.1;
         } else {
-            return NULL;
+            $minimumDownPayment = $propertyPrice * 0.05;
         }
+
+        if ($downPayment < $minimumDownPayment) {
+            throw new Exception("Your minimum Down Payment: {$minimumDownPayment}, Check more details here: https://www.ratehub.ca/cmhc-insurance-british-columbia");
+        }
+
+        $downPaymentPercentage = $downPayment / $propertyPrice * 100;
+
+        if ($amortizationPeriod > 25 && $downPaymentPercentage < 20) {
+            throw new Exception("The maximum amortization period is 25 years for mortgages with less than 20% down.");
+        }
+        
+        // If down payment is less than 20%, calculate CMHC insurance
+        if ($downPaymentPercentage < 20) {
+            $mortgageBeforeCMHC = $propertyPrice - $downPayment;
+
+            if ($downPaymentPercentage >= 15) {
+                $cmhcTaxRate = 0.028;
+            } elseif ($downPaymentPercentage >= 10) {
+                $cmhcTaxRate = 0.031;
+            } else {
+                $cmhcTaxRate = 0.04;
+            }
+
+            return $mortgageBeforeCMHC * $cmhcTaxRate;
+        }
+
+        return 0;
     }
 
     private function calculatePayment($principal, $annualInterestRate, $amortizationPeriod, $paymentSchedule)
@@ -56,7 +73,7 @@ class MortgageCalculatorService
                 $paymentsPerYear = 26;
                 break;
             case 'bi_weekly':
-                $paymentsPerYear = 26;
+                $paymentsPerYear = 24;
                 break;
             case 'monthly':
                 $paymentsPerYear = 12;
