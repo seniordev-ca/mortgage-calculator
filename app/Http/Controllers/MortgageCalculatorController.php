@@ -18,7 +18,7 @@ class MortgageCalculatorController extends Controller
     public function calculate(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'property_price' => 'required|numeric|min:1',
+            'property_price' => 'required|numeric|min:1|gte:down_payment',
             'down_payment' => 'required|numeric|min:1',
             'annual_interest_rate' => 'required|numeric|min:1',
             'amortization_period' => 'required|numeric|min:5|max:30',
