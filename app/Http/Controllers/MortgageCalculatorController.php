@@ -22,7 +22,7 @@ class MortgageCalculatorController extends Controller
             'down_payment' => 'required|numeric|min:1',
             'annual_interest_rate' => 'required|numeric|min:1',
             'amortization_period' => 'required|numeric|min:5|max:30',
-            'payment_schedule' => 'required|string|in:accelerated bi-weekly,bi-weekly,monthly',
+            'payment_schedule' => 'required|string|in:accelerated_bi_weekly,bi_weekly,monthly',
         ]);
 
         if ($validator->fails()) {

@@ -1,0 +1,11 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+.btn {
+  @apply text-base font-medium rounded-lg p-3;
+}
+
+.btn--primary {
+  @apply bg-sky-500 text-white;
+}
