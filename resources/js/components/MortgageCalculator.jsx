@@ -50,9 +50,9 @@ const MortgageCalculator = () => {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-6 bg-white rounded-xl shadow-md flex items-center space-x-4">
+    <div className="max-w-xl mx-auto p-6 mt-8 bg-white rounded-xl shadow-md flex items-center space-x-4">
       <div className="flex-shrink-0 w-full">
-        <h2 className='font-bold mb-3'>Mortgage Payment Calculator</h2>
+        <h1 className='font-bold mb-3 text-center'>Mortgage Payment Calculator</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">
@@ -130,9 +130,9 @@ const MortgageCalculator = () => {
         </form>
         {payment && (
           <div>
-            <div>CMHC insurance: {payment.cmhc_insurance_premium}</div>
-            <div>Total mortgage: {payment.total_mortgage}</div>
-            <div>Payment per schedule: {payment.payment_per_schedule}</div>
+            <div>CMHC insurance: ${payment.cmhc_insurance_premium}</div>
+            <div>Total mortgage: ${payment.total_mortgage}</div>
+            <div>Payment per schedule: ${payment.payment_per_schedule?.toFixed(2)}</div>
           </div>
         )}
         {errors.error && <span className="text-red-500 text-xs italic">{errors.error}</span>}
